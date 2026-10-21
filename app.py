@@ -40,7 +40,7 @@ Never stop or change a medication without talking to your doctor or pharmacist.
 SIGNAL_NOTE = """
 **How to read this tab.** The proportional reporting ratio (PRR) compares the share of this drug's reports
 that mention a reaction with the same share for every other drug. A PRR of 3 means the reaction appears
-three times more often, proportionally. Teal bars meet a common screening rule (PRR ≥ 2, 95% CI above 1,
+three times more often, proportionally. Teal bars meet a common screening rule (PRR >= 2, 95% CI above 1,
 at least 3 reports). A signal is a reason to look closer, not proof of harm.
 """
 
@@ -71,7 +71,7 @@ def analyze(drug_input):
         peak = yearly.loc[yearly["reports"].idxmax()]
         lines.append(f"**Peak year:** {int(peak['year'])} ({int(peak['reports']):,} reports)")
     if by_sex is not None:
-        shares = " · ".join(f"{row['sex']}: {row['percent']}%" for _, row in by_sex.iterrows())
+        shares = ", ".join(f"{row['sex']}: {row['percent']}%" for _, row in by_sex.iterrows())
         lines.append(f"**Reports by sex:** {shares}")
     if signals is not None:
         flagged = signals[signals["signal"]]["reaction"].str.lower().head(5).tolist()

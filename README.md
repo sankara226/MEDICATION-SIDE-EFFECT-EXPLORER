@@ -1,4 +1,4 @@
-# 💊 Medication Side Effect Explorer
+# Medication Side Effect Explorer
 
 [![tests](https://github.com/sankara226/MEDICATION-SIDE-EFFECT-EXPLORER/actions/workflows/tests.yml/badge.svg)](https://github.com/sankara226/MEDICATION-SIDE-EFFECT-EXPLORER/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -8,7 +8,7 @@
 20 million adverse event reports from the FDA Adverse Event Reporting System (FAERS) through the free
 [openFDA API](https://open.fda.gov/apis/drug/event/). It ships as an analysis notebook, a small Python package and a web app.
 
-> ⚠️ A report means someone took a drug and later had a reaction. It does **not** prove the drug caused it.
+> A report means someone took a drug and later had a reaction. It does **not** prove the drug caused it.
 > Educational project, **not medical advice**.
 
 ![The app analysing Zoloft](assets/app_screenshot.png)
@@ -36,12 +36,12 @@ headache) look like the top of almost any drug's list.
 **2. Disproportionality analysis finds the real signal.** The proportional reporting ratio (PRR) compares the share of
 a drug's reports mentioning a reaction with the same share for all other drugs. Ranked by PRR, the top of the list is
 **suicide attempt (PRR 6.0), suicidal ideation (5.7), agitation and tremor**, which matches the known SSRI safety
-profile and the FDA boxed warning on suicidality. *Drug ineffective* falls to PRR ≈ 1.0.
+profile and the FDA boxed warning on suicidality. *Drug ineffective* falls to a PRR of about 1.0.
 
 <img src="assets/signals.png" width="720" alt="PRR signals for sertraline">
 
 **3. The method passes a sanity check.** On **metformin**, with no hint given, the top signal is **lactic acidosis
-(PRR ≈ 73)**, the drug's boxed warning.
+(PRR of about 73)**, the drug's boxed warning.
 
 **4. Women vs men: compare proportions, not counts.** 67% of sertraline reports concern women, who are also
 prescribed antidepressants more often. Within each sex, women's reports mention nausea and headache more often,
@@ -57,26 +57,12 @@ volumes to normalise by.
 
 ## How it works
 
-```
- user input ──► find_drug ──► brand → generic, strip salts, typo suggestions (difflib)
-                    │
-                    ▼
-   openFDA "count" queries (server-side aggregation, ~10 requests per new drug, cached)
-                    │
-     ┌──────────────┼──────────────┬──────────────────┐
-     ▼              ▼              ▼                  ▼
- top reactions   by sex       reports per year    PRR signals
-     └──────────────┴──────┬───────┴──────────────────┘
-                           ▼
-         matplotlib charts ──► notebook / Gradio app
-```
-
-- **`med_explorer/api.py`**: one function for every request, with a timeout, readable error messages, an in-memory cache
-  and optional `OPENFDA_API_KEY` support.
-- **`med_explorer/analysis.py`**: name resolution, reactions, sex comparison, yearly trend and PRR. Every function returns
-  `(result, error)` instead of raising, so the app shows a message instead of crashing.
-- **`med_explorer/charts.py`**: figures shared by the notebook and the app.
-- **`app.py`**: the Gradio interface (summary plus four tabs).
+1. **Find the drug.** The input is cleaned, brand names are converted to generics (Zoloft to sertraline),
+   salt suffixes are stripped and typos get suggestions from `difflib`.
+2. **Query openFDA.** Each analysis is a `count` query, aggregated on the server. A new drug costs about
+   10 requests, and repeated searches come from an in-memory cache.
+3. **Analyse.** Top reactions, women vs men, reports per year and PRR signals.
+4. **Display.** Matplotlib charts shared by the notebook and the Gradio app.
 
 ### The PRR in one table
 
@@ -86,7 +72,7 @@ volumes to normalise by.
 | **all other drugs** | c          | d               |
 
 `PRR = [a / (a+b)] / [c / (c+d)]`, with a 95% confidence interval on the log scale. A reaction is flagged when
-PRR ≥ 2, the interval's lower bound is above 1 and there are at least 3 reports, a common screening rule in
+PRR >= 2, the interval's lower bound is above 1 and there are at least 3 reports, a common screening rule in
 pharmacovigilance. All four cells come from openFDA counts: one cached query for database-wide reaction totals, plus
 individual lookups for rarer terms.
 
@@ -94,7 +80,7 @@ individual lookups for rarer terms.
 
 **Worked**
 - openFDA `count` queries do the aggregation on the server, so each chart needs one small request and no bulk download.
-- Forgiving search: brand names (*Zoloft → sertraline*, *Tylenol → acetaminophen*) and typo suggestions (*ibuprofin → ibuprofen*).
+- Forgiving search: brand names (*Zoloft* finds sertraline, *Tylenol* finds acetaminophen) and typo suggestions (*ibuprofin* suggests ibuprofen).
 - The PRR recovered known warnings for two unrelated drugs without being told what to look for.
 - The `(result, error)` pattern: empty input, unknown drugs, timeouts and rate limits all produce a friendly message.
 
@@ -108,7 +94,7 @@ individual lookups for rarer terms.
 | Women/men tables merged on each sex's top 10 | Blank bars when a reaction was 11th for one sex | Values looked up in a top-100 list |
 | Brand lookup returned `SERTRALINE HYDROCHLORIDE` | Exact phrase missed about half the reports | Salt suffixes stripped |
 | `count_reports` returned 0 on any error | A network failure looked like "drug not found" | HTTP 404 means zero; other errors are reported |
-| Stray openFDA records dated 1997–2003 | Flat line at zero before the data really starts | Trend starts in 2004 |
+| Stray openFDA records dated 1997 to 2003 | Flat line at zero before the data really starts | Trend starts in 2004 |
 | Original script named `code.py` | Shadowed Python's built-in `code` module, so the test runner froze | Renamed |
 | `count` limit 1,000 without an API key | openFDA rejects it (`API_KEY_MISSING`) | Limit set to 500 unless a key is present |
 
@@ -151,20 +137,18 @@ Optional: a free [openFDA API key](https://open.fda.gov/apis/authentication/) ra
 
 ## Project structure
 
-```
-├── app.py                         Gradio web app
-├── med_explorer/                  Reusable package
-│   ├── api.py                     openFDA client: errors, cache, API key
-│   ├── analysis.py                Name resolution, reactions, sex, trends, PRR
-│   └── charts.py                  Matplotlib figures
-├── notebooks/
-│   └── medication_side_effect_explorer.ipynb   Full analysis with outputs
-├── tests/test_explorer.py         Offline test suite (fake openFDA server)
-├── original/                      First version, written step by step in Colab
-├── assets/                        Charts and screenshot used in this README
-├── deploy/                        Hugging Face Spaces deployment
-└── .github/workflows/tests.yml    CI: runs the tests on every push
-```
+| Path | Content |
+|---|---|
+| `app.py` | Gradio web app |
+| `med_explorer/api.py` | openFDA client: errors, cache, API key |
+| `med_explorer/analysis.py` | Name resolution, reactions, sex comparison, trends, PRR |
+| `med_explorer/charts.py` | Matplotlib figures |
+| `notebooks/` | Full analysis with outputs |
+| `tests/` | Offline test suite (fake openFDA server) |
+| `original/` | First version, written step by step in Colab |
+| `assets/` | Charts and screenshot used in this README |
+| `deploy/` | Step-by-step Hugging Face Spaces deployment |
+| `.github/workflows/` | CI: runs the tests on every push |
 
 ## Data and license
 
