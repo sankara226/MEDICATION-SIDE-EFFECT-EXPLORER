@@ -4,6 +4,8 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+**Live demo:** [huggingface.co/spaces/sankara226/medication-side-effect-explorer](https://huggingface.co/spaces/sankara226/medication-side-effect-explorer)
+
 **Type a medication, see what people reported to the U.S. FDA after taking it.** The project explores about
 20 million adverse event reports from the FDA Adverse Event Reporting System (FAERS) through the free
 [openFDA API](https://open.fda.gov/apis/drug/event/). It ships as an analysis notebook, a small Python package and a web app.

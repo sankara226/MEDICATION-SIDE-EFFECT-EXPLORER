@@ -42,6 +42,11 @@ Copy the Space link (`https://huggingface.co/spaces/YOUR_USERNAME/medication-sid
 - to the main README, under the title: `**Live demo:** <link>`
 - to the GitHub repo's **About** box (gear icon on the repo page, field "Website")
 
+## ZeroGPU hardware
+
+If the Space runs on ZeroGPU instead of CPU basic, it only starts when one function is marked `@spaces.GPU`.
+`app.py` already contains a do-nothing placeholder for this, which is skipped outside Hugging Face.
+
 ## Updating the app
 
 After changing the code, upload the changed files again in the Files tab. The Space rebuilds on its own.

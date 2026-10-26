@@ -23,6 +23,18 @@ from med_explorer.charts import (
     make_trend_chart,
 )
 
+# On Hugging Face ZeroGPU hardware the Space refuses to start unless at least
+# one function is marked @spaces.GPU. The app needs no GPU, so this is a
+# placeholder. The `spaces` package only exists on Hugging Face.
+try:
+    import spaces
+
+    @spaces.GPU
+    def _zero_gpu_placeholder():
+        pass
+except ImportError:
+    pass
+
 # Loaded once at startup for "did you mean" suggestions. If openFDA is down
 # the app still works, it just can't suggest spellings.
 catalog, _ = get_drug_catalog()
