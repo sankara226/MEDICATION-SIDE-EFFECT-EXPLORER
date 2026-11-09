@@ -1,52 +1,39 @@
-# Deploying to Hugging Face Spaces
+# Deploying to Render
 
-The app runs for free on a Hugging Face Space. Everything happens in the browser, no installation needed.
+The live demo runs on a free [Render](https://render.com) web service, deployed straight from this GitHub repo.
 
-## 1. Create the Space
+## 1. Create the service
 
-1. Create a free account at [huggingface.co/join](https://huggingface.co/join).
-2. Open [huggingface.co/new-space](https://huggingface.co/new-space) and fill in:
-   - **Space name:** `medication-side-effect-explorer`
-   - **License:** MIT
-   - **Space SDK:** Gradio, template **Blank**
-   - **Hardware:** CPU basic (free)
-   - **Visibility:** Public
-3. Click **Create Space**.
+1. Sign up at [render.com](https://render.com) with your GitHub account.
+2. Click **+ New > Web Service** and connect this repository.
+3. Fill in:
 
-## 2. Upload the files
+| Field | Value |
+|---|---|
+| Language | Python 3 |
+| Branch | `main` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `python app.py` |
+| Instance Type | Free |
 
-1. In the Space, open the **Files** tab, then **Contribute > Upload files**.
-2. Drag in these three items from this project:
-   - `app.py`
-   - `requirements.txt`
-   - the whole `med_explorer` folder
-3. Click **Commit changes to main**.
+## 2. Add the environment variables
 
-The Space builds automatically. After 2 to 3 minutes the **App** tab shows the running app.
+| Key | Value | Why |
+|---|---|---|
+| `OPENFDA_API_KEY` | your key | openFDA rejects keyless requests from shared cloud servers (403) |
+| `GRADIO_SERVER_NAME` | `0.0.0.0` | makes the app reachable from outside the server |
+| `GRADIO_SERVER_PORT` | `10000` | the port Render routes traffic to |
+| `PYTHON_VERSION` | `3.11.9` | pins a stable Python version |
 
-If the uploader drops the folder structure, upload the `med_explorer` files again and type `med_explorer/` in front
-of each name before committing, so the four files sit inside a `med_explorer` folder in the Space.
+Get a free openFDA key at [open.fda.gov/apis/authentication](https://open.fda.gov/apis/authentication/).
 
-## 3. Add an openFDA API key (recommended)
+## 3. Deploy
 
-Without a key, all visitors share a limit of 1,000 openFDA requests per day, which is about 100 new drug searches.
+Click **Deploy Web Service**. After 3 to 5 minutes the logs show "Your service is live" and the URL
+(`https://<name>.onrender.com`) appears at the top of the page.
 
-1. Get a free key at [open.fda.gov/apis/authentication](https://open.fda.gov/apis/authentication/).
-2. In the Space, open **Settings > Variables and secrets > New secret**.
-3. Name: `OPENFDA_API_KEY`, value: your key. The Space restarts and uses it.
+## Good to know
 
-## 4. Share it
-
-Copy the Space link (`https://huggingface.co/spaces/YOUR_USERNAME/medication-side-effect-explorer`) and add it:
-
-- to the main README, under the title: `**Live demo:** <link>`
-- to the GitHub repo's **About** box (gear icon on the repo page, field "Website")
-
-## ZeroGPU hardware
-
-If the Space runs on ZeroGPU instead of CPU basic, it only starts when one function is marked `@spaces.GPU`.
-`app.py` already contains a do-nothing placeholder for this, which is skipped outside Hugging Face.
-
-## Updating the app
-
-After changing the code, upload the changed files again in the Files tab. The Space rebuilds on its own.
+- **Sleep:** free services sleep after 15 minutes without visitors. The next visit wakes them up in 30 to 60 seconds.
+- **Updates:** every push to `main` redeploys the app automatically.
+- **Errors:** open the **Logs** tab of the service to see what went wrong.

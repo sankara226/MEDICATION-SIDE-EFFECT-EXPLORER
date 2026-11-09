@@ -9,8 +9,8 @@ import os
 
 import requests
 
-# Locally, settings can live in a .env file at the project root. On Hugging
-# Face the key comes from the Space's secrets and python-dotenv isn't needed.
+# Locally, settings can live in a .env file at the project root. On the host
+# (Render) the key comes from an environment variable and python-dotenv isn't needed.
 try:
     from dotenv import load_dotenv
 

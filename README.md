@@ -4,7 +4,8 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Live demo:** [huggingface.co/spaces/sankara226/medication-side-effect-explorer](https://huggingface.co/spaces/sankara226/medication-side-effect-explorer)
+**Live demo:** [medication-side-effect-explorer.onrender.com](https://medication-side-effect-explorer.onrender.com/)
+*(hosted on a free server: the first visit can take up to a minute while it wakes up)*
 
 **Type a medication, see what people reported to the U.S. FDA after taking it.** The project explores about
 20 million adverse event reports from the FDA Adverse Event Reporting System (FAERS) through the free
@@ -136,7 +137,7 @@ Optional: a free [openFDA API key](https://open.fda.gov/apis/authentication/) ra
 120,000 requests. Copy `.env.example` to `.env` and paste the key after `OPENFDA_API_KEY=`. The `.env` file is
 ignored by git, so the key stays on your machine.
 
-**Deploy:** the app is ready for Hugging Face Spaces, see [`deploy/README.md`](deploy/README.md).
+**Deploy:** the live demo runs on Render, see [`deploy/README.md`](deploy/README.md).
 
 ## Project structure
 
@@ -150,7 +151,7 @@ ignored by git, so the key stays on your machine.
 | `tests/` | Offline test suite (fake openFDA server) |
 | `original/` | First version, written step by step in Colab |
 | `assets/` | Charts and screenshot used in this README |
-| `deploy/` | Step-by-step Hugging Face Spaces deployment |
+| `deploy/` | Step-by-step Render deployment |
 | `.github/workflows/` | CI: runs the tests on every push |
 
 ## Data and license
