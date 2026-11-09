@@ -15,28 +15,47 @@ TIMEOUT = 15
 # Without a key openFDA allows 240 requests/minute and 1,000/day per IP,
 # and caps "count" queries at 500 terms. A free key lifts the daily limit
 # to 120,000: https://open.fda.gov/apis/authentication/
-API_KEY = os.environ.get("OPENFDA_API_KEY")
-MAX_COUNT_LIMIT = 1000 if API_KEY else 500
+NO_KEY_COUNT_LIMIT = 500
+
+
+def clean_key(value):
+    """Keys pasted into a settings page often carry spaces, newlines or quotes,
+    and openFDA rejects the whole request (403) if they do."""
+    return (value or "").strip().strip("\"'").strip() or None
+
+
+API_KEY = clean_key(os.environ.get("OPENFDA_API_KEY"))
+MAX_COUNT_LIMIT = 1000 if API_KEY else NO_KEY_COUNT_LIMIT
 
 _cache = {}
 
 
 def fetch_openfda(params):
     """GET the endpoint with `params`. Returns (json, None) or (None, message)."""
-    params = dict(params)
-    if API_KEY:
-        params["api_key"] = API_KEY
+    global API_KEY
 
     key = tuple(sorted(params.items()))
     if key in _cache:
         return _cache[key], None
 
+    query = dict(params)
+    if API_KEY:
+        query["api_key"] = API_KEY
+    elif query.get("limit", 0) > NO_KEY_COUNT_LIMIT:
+        query["limit"] = NO_KEY_COUNT_LIMIT
+
     try:
-        response = requests.get(BASE_URL, params=params, timeout=TIMEOUT)
+        response = requests.get(BASE_URL, params=query, timeout=TIMEOUT)
     except requests.exceptions.Timeout:
         return None, "openFDA took too long to answer. Please try again."
     except requests.exceptions.ConnectionError:
         return None, "Could not connect to openFDA. Check your internet connection."
+
+    # A rejected key would break every search: drop it and carry on without one
+    if response.status_code == 403 and API_KEY:
+        print("openFDA rejected OPENFDA_API_KEY (403). Continuing without a key.")
+        API_KEY = None
+        return fetch_openfda(params)
 
     if response.status_code == 200:
         data = response.json()

@@ -70,6 +70,32 @@ def test_errors_become_messages(fake_fda):
     assert "connect" in api.fetch_openfda({"search": "d"})[1]
 
 
+@pytest.mark.parametrize("raw", ["abc", " abc ", "abc\n", '"abc"', "'abc' "])
+def test_clean_key(raw):
+    assert api.clean_key(raw) == "abc"
+
+
+@pytest.mark.parametrize("raw", [None, "", "   ", '""'])
+def test_clean_key_empty(raw):
+    assert api.clean_key(raw) is None
+
+
+def test_rejected_key_falls_back_to_no_key(fake_fda, monkeypatch):
+    _, calls = fake_fda
+    monkeypatch.setattr(api, "API_KEY", "bad-key")
+
+    def fake_get(url, params, timeout):
+        calls.append(params)
+        return FakeResponse(403) if "api_key" in params else FakeResponse(200, total(7))
+
+    monkeypatch.setattr(api.requests, "get", fake_get)
+    data, error = api.fetch_openfda({"count": "x", "limit": 1000})
+
+    assert error is None and data == total(7)
+    assert api.API_KEY is None
+    assert calls[-1] == {"count": "x", "limit": 500}
+
+
 def test_successes_are_cached_but_errors_are_not(fake_fda):
     routes, calls = fake_fda
     routes[("ok", None)] = total(5)
