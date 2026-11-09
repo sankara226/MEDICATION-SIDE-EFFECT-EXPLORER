@@ -133,7 +133,8 @@ pytest                                                # 29 offline tests, openFD
 ```
 
 Optional: a free [openFDA API key](https://open.fda.gov/apis/authentication/) raises the daily limit from 1,000 to
-120,000 requests: `export OPENFDA_API_KEY=your_key`.
+120,000 requests. Copy `.env.example` to `.env` and paste the key after `OPENFDA_API_KEY=`. The `.env` file is
+ignored by git, so the key stays on your machine.
 
 **Deploy:** the app is ready for Hugging Face Spaces, see [`deploy/README.md`](deploy/README.md).
 

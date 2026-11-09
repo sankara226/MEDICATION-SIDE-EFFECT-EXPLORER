@@ -9,6 +9,15 @@ import os
 
 import requests
 
+# Locally, settings can live in a .env file at the project root. On Hugging
+# Face the key comes from the Space's secrets and python-dotenv isn't needed.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
 BASE_URL = "https://api.fda.gov/drug/event.json"
 TIMEOUT = 15
 
