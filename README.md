@@ -129,7 +129,7 @@ pip install -r requirements-dev.txt
 
 python app.py                                         # web app at http://127.0.0.1:7860
 jupyter notebook notebooks/medication_side_effect_explorer.ipynb
-pytest                                                # 19 offline tests, openFDA is mocked
+pytest                                                # 29 offline tests, openFDA is mocked
 ```
 
 Optional: a free [openFDA API key](https://open.fda.gov/apis/authentication/) raises the daily limit from 1,000 to
